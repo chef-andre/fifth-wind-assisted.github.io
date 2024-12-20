@@ -1,78 +1,292 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>fifth wind</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RetroGame Zone</title>
+  <style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: #000;
+    color: #fff;
+    font-family: Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+  }
+
+  .logo {
+    text-align: center;
+    margin: 40px 0;
+    animation: glow 2s ease-in-out infinite;
+  }
+
+  .logo h1 {
+    font-size: 48px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    color: #0f0;
+    text-shadow: 0 0 10px #0f0;
+  }
+
+  .scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      transparent 50%,
+      rgba(0, 0, 0, 0.5) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .nav-container {
+    background: rgba(0, 255, 0, 0.1);
+    border: 2px solid #0f0;
+    padding: 20px;
+    margin: 20px 0;
+  }
+
+  .nav-list {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+  }
+
+  .nav-list li {
+    margin: 10px;
+  }
+
+  .nav-list a {
+    color: #0f0;
+    text-decoration: none;
+    font-size: 18px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    padding: 5px 10px;
+  }
+
+  .nav-list a:hover {
+    color: #000;
+    background: #0f0;
+  }
+
+  .game-controls {
+    text-align: center;
+    margin: 40px 0;
+  }
+
+  .d-pad {
+    display: inline-block;
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 20px;
+  }
+
+  .d-pad button {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: #333;
+    border: 2px solid #0f0;
+    color: #0f0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .d-pad button:hover {
+    background: #0f0;
+    color: #000;
+  }
+
+  .up { top: 0; left: 55px; }
+  .right { top: 55px; right: 0; }
+  .down { bottom: 0; left: 55px; }
+  .left { top: 55px; left: 0; }
+
+  .action-buttons {
+    display: inline-block;
+    margin: 20px;
+  }
+
+  .action-buttons button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin: 5px;
+    background: #333;
+    border: 2px solid #0f0;
+    color: #0f0;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .action-buttons button:hover {
+    background: #0f0;
+    color: #000;
+  }
+
+  .sprite {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    background: #0f0;
+    transition: all 0.2s ease;
+  }
+
+  @keyframes glow {
+    0% { text-shadow: 0 0 10px #0f0; }
+    50% { text-shadow: 0 0 20px #0f0, 0 0 30px #0f0; }
+    100% { text-shadow: 0 0 10px #0f0; }
+  }
+
+  .crt-power {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #333;
+    border: 2px solid #0f0;
+    color: #0f0;
+    padding: 10px 20px;
+    cursor: pointer;
+    z-index: 101;
+  }
+
+  .power-off {
+    animation: powerOff 0.5s forwards;
+  }
+
+  @keyframes powerOff {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { 
+      transform: scale(0);
+      height: 2px;
+    }
+  }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    color: #0f0;
+    font-size: 14px;
+  }
+  </style>
 </head>
 <body>
+  <div class="scanlines"></div>
+  <button class="crt-power">POWER</button>
 
-    
-    <header>
-        <nav class="navbar">
-            <ul>
-                <li><a href="#home">top</a></li>
-                <li><a href="#about">middle</a></li>
-                <li><a href="#contact">bottom</a></li>
-            </ul>
-        </nav>
-    </header>
-    
-    
-    <section id="home">
-        <h1>fifth wind</h1>
-            
+  <div class="container">
+    <div class="logo">
+      <h1>/ w / i / n / d /</h1>
+    </div>
 
-        <div class="grid-container">
-            <div class="grid-item">
-                <img src="static/ravens3.png" alt="a bird whistling">
-                <div class="image-text">here at fifth wind we are dedicated to the pursuit of knowledge, and the betterment of the human condition, and the advancement of technology. we are a small team of engineers, scientists, and programmers, and we are always looking for new members to join our team. if you are interested in joining our team, please contact us below. we are currently working on a number of projects, and we are always looking for new ideas. if you have an idea for a project, please contact us below. we are always looking for new ideas, and we are always looking for new members to join our team. if you are interested in joining our team, please contact us below. we are always looking for new ideas, and we are always looking for new members to join our team. if you are interested in joining our team, please contact us below. we are always looking for new ideas, and we are always looking for new members to join our team. if you are interested in joining our team, please contact us below.</div>
-            </div>
+    <nav class="nav-container">
+      <ul class="nav-list">
+        <li><a href="qwop.html">qwop</a></li>
+        <li><a href="scoreboard.html">scores</a></li>
+        <li><a href="#about">about</a></li>
+        <li><a href="#contact">contact</a></li>
+      </ul>
+    </nav>
 
-            
-        </div>
+    <div class="game-controls">
+      <div class="d-pad">
+        <button class="up">↑</button>
+        <button class="right">→</button>
+        <button class="down">↓</button>
+        <button class="left">←</button>
+      </div>
 
-    </main>
-    
+      <div class="action-buttons">
+        <button class="a-btn">A</button>
+        <button class="b-btn">B</button>
+      </div>
+    </div>
+
+    <div id="sprite" class="sprite"></div>
+  </div>
+
+  <footer>
+    © 2024 RetroGame Zone - All rights reserved
+  </footer>
+
+  <script type="module">
+let sprite = {
+  x: 400,
+  y: 300,
+  speed: 5
 }
-    <section id="about">
-        <h2>about</h2>
-        
-        <div class="grid-container">
-            
-            <div class="grid-item">
-                <img src="static/carousel/c1.jpeg" alt="Image 1">
-                <div class="card-text">software</div>
-            </div>
-            <div class="grid-item">
-                <img src="static/carousel/c2.jpeg" alt="Image 2">
-                <div class="card-text">hardware</div>
-            </div>
-            <div class="grid-item">
-                <img src="static/carousel/c3.jpeg" alt="Image 3">
-                <div class="card-text">research</div>
-            </div>
-            <div class="grid-item">
-                <img src="static/carousel/c4.jpeg" alt="Image 4">
-                <div class="card-text">coming soon</div>
-            </div>
-        </div>
-    </section>
-    <section id="contact">
-        
-        
-        <h2>Contact</h2>
-        <p>Please leave a message below</p>
 
+const spriteEl = document.getElementById('sprite')
+updateSpritePosition()
 
-        <div class="grid-container">
-            <!-- Your grid items go here -->
-            <!-- Add more items as needed -->
-        </div>
-    </section>
-    <footer>
-        <p>Copyright &copy; 1823</p>
-    </footer>
+// D-pad controls
+document.querySelectorAll('.d-pad button').forEach(button => {
+  button.addEventListener('mousedown', () => moveSprite(button.className))
+})
+
+// Action button effects
+document.querySelector('.a-btn').addEventListener('click', () => {
+  spriteEl.style.transform = 'scale(2)'
+  setTimeout(() => spriteEl.style.transform = 'scale(1)', 200)
+})
+
+document.querySelector('.b-btn').addEventListener('click', () => {
+  spriteEl.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`
+})
+
+// Power button
+document.querySelector('.crt-power').addEventListener('click', () => {
+  document.body.classList.toggle('power-off')
+})
+
+function moveSprite(direction) {
+  switch(direction) {
+    case 'up':
+      sprite.y -= sprite.speed
+      break
+    case 'right':
+      sprite.x += sprite.speed
+      break
+    case 'down':
+      sprite.y += sprite.speed
+      break
+    case 'left':
+      sprite.x -= sprite.speed
+      break
+  }
+  
+  // Keep sprite within bounds
+  sprite.x = Math.max(0, Math.min(sprite.x, 800 - 32))
+  sprite.y = Math.max(0, Math.min(sprite.y, 600 - 32))
+  
+  updateSpritePosition()
+}
+
+function updateSpritePosition() {
+  spriteEl.style.left = `${sprite.x}px`
+  spriteEl.style.top = `${sprite.y}px`
+}
+  </script>
 </body>
 </html>

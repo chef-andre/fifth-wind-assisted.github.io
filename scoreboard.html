@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scene Analysis</title>
+  <style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+body {
+  background: #f5f5f5;
+  padding: 20px;
+}
+
+.container {
+  display: flex;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.input-section {
+  flex: 1;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.analysis-section {
+  flex: 1;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.config-group {
+  margin-bottom: 20px;
+}
+
+.config-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.config-group input,
+.config-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+.input-toggle {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.input-toggle button {
+  flex: 1;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.input-toggle button.active {
+  background: #0066cc;
+  color: white;
+  border-color: #0066cc;
+}
+
+.file-input-area {
+  border: 2px dashed #ddd;
+  border-radius: 4px;
+  padding: 40px 20px;
+  text-align: center;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.file-input-area.dragover {
+  border-color: #0066cc;
+  background: rgba(0,102,204,0.05);
+}
+
+.file-input-area input[type="file"] {
+  display: none;
+}
+
+#video {
+  width: 100%;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  display: none;
+}
+
+#preview-image {
+  max-width: 100%;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  display: none;
+}
+
+.action-button {
+  width: 100%;
+  padding: 12px;
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.action-button:hover {
+  background: #0052a3;
+}
+
+.action-button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+.output-container {
+  margin-top: 15px;
+}
+
+.output-section {
+  margin-bottom: 20px;
+}
+
+.output-section h3 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.output-content {
+  background: #f8f8f8;
+  border-radius: 4px;
+  padding: 15px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#api-key-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+}
+
+#api-key-input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="input-section">
+      <div class="config-group">
+        <label for="base-url">OpenAI Base URL:</label>
+        <input type="text" id="base-url" placeholder="https://api.openai.com/v1" value="https://api.openai.com/v1">
+        
+        <label for="model-select">Model:</label>
+        <select id="model-select">
+          <option value="">Loading models...</option>
+        </select>
+      </div>
+
+      <div class="input-toggle">
+        <button id="file-toggle" class="active">Upload File</button>
+        <button id="camera-toggle">Use Camera</button>
+      </div>
+
+      <div id="file-input-container">
+        <div class="file-input-area" id="drop-zone">
+          <input type="file" id="file-input" accept="image/*">
+          <p>Drop an image here or click to choose file</p>
+        </div>
+        <img id="preview-image" alt="Preview">
+      </div>
+
+      <div id="camera-input-container" style="display: none;">
+        <video id="video" autoplay playsinline></video>
+      </div>
+
+      <button id="analyze-btn" class="action-button" disabled>Analyze Scene</button>
+    </div>
+
+    <div class="analysis-section">
+      <div class="output-container">
+        <div class="output-section">
+          <h3>Scene Description</h3>
+          <div id="description" class="output-content">
+            Waiting for analysis...
+          </div>
+        </div>
+        <div class="output-section">
+          <h3>Objects Detected</h3>
+          <div id="objects" class="output-content">
+            Waiting for analysis...
+          </div>
+        </div>
+        <div class="output-section">
+          <h3>Context Analysis</h3>
+          <div id="context" class="output-content">
+            Waiting for analysis...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="api-key-modal">
+    <div class="modal-content">
+      <h2>Enter OpenAI API Key</h2>
+      <p>Your API key will be stored locally and never sent to any server except OpenAI.</p>
+      <input type="password" id="api-key-input" placeholder="sk-...">
+      <button id="save-api-key" class="action-button">Save API Key</button>
+    </div>
+  </div>
+
+  <script type="module">
+let stream
+let apiKey = localStorage.getItem('openai-api-key')
+let currentMode = 'file'
+
+// DOM Elements
+const video = document.getElementById('video')
+const fileInput = document.getElementById('file-input')
+const dropZone = document.getElementById('drop-zone')
+const previewImage = document.getElementById('preview-image')
+const analyzeBtn = document.getElementById('analyze-btn')
+const fileToggle = document.getElementById('file-toggle')
+const cameraToggle = document.getElementById('camera-toggle')
+const fileInputContainer = document.getElementById('file-input-container')
+const cameraInputContainer = document.getElementById('camera-input-container')
+const baseUrlInput = document.getElementById('base-url')
+const modelSelect = document.getElementById('model-select')
+const apiKeyModal = document.getElementById('api-key-modal')
+const apiKeyInput = document.getElementById('api-key-input')
+const saveApiKeyBtn = document.getElementById('save-api-key')
+
+// Show API key modal if not set
+if (!apiKey) {
+  apiKeyModal.style.display = 'block'
+}
+
+// Load available models
+async function loadModels() {
+  try {
+    const response = await fetch(`${baseUrlInput.value}/models`, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`
+      }
+    })
+    const data = await response.json()
+    
+    modelSelect.innerHTML = data.data
+      .filter(model => model.id.includes('vision'))
+      .map(model => `<option value="${model.id}">${model.id}</option>`)
+      .join('')
+    
+    if (modelSelect.options.length > 0) {
+      modelSelect.value = 'gpt-4-vision-preview'
+    }
+  } catch (err) {
+    console.error('Error loading models:', err)
+    modelSelect.innerHTML = '<option value="gpt-4-vision-preview">gpt-4-vision-preview</option>'
+  }
+}
+
+// Initialize webcam
+async function initializeWebcam() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ 
+      video: { 
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      } 
+    })
+    video.srcObject = stream
+    analyzeBtn.disabled = false
+  } catch (err) {
+    console.error('Error accessing webcam:', err)
+    alert('Unable to access webcam. Please ensure you have granted camera permissions.')
+  }
+}
+
+// Handle file selection
+fileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0]
+  if (file) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      previewImage.src = e.target.result
+      previewImage.style.display = 'block'
+      analyzeBtn.disabled = false
+    }
+    reader.readAsDataURL(file)
+  }
+})
+
+// Handle drag and drop
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault()
+  dropZone.classList.add('dragover')
+})
+
+dropZone.addEventListener('dragleave', () => {
+  dropZone.classList.remove('dragover')
+})
+
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault()
+  dropZone.classList.remove('dragover')
+  
+  const file = e.dataTransfer.files[0]
+  if (file && file.type.startsWith('image/')) {
+    fileInput.files = e.dataTransfer.files
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      previewImage.src = e.target.result
+      previewImage.style.display = 'block'
+      analyzeBtn.disabled = false
+    }
+    reader.readAsDataURL(file)
+  }
+})
+
+dropZone.addEventListener('click', () => {
+  fileInput.click()
+})
+
+// Toggle between file and camera inputs
+fileToggle.addEventListener('click', () => {
+  currentMode = 'file'
+  fileToggle.classList.add('active')
+  cameraToggle.classList.remove('active')
+  fileInputContainer.style.display = 'block'
+  cameraInputContainer.style.display = 'none'
+  video.srcObject = null
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop())
+  }
+})
+
+cameraToggle.addEventListener('click', () => {
+  currentMode = 'camera'
+  cameraToggle.classList.add('active')
+  fileToggle.classList.remove('active')
+  fileInputContainer.style.display = 'none'
+  cameraInputContainer.style.display = 'block'
+  video.style.display = 'block'
+  previewImage.style.display = 'none'
+  initializeWebcam()
+})
+
+// Save API key
+saveApiKeyBtn.addEventListener('click', () => {
+  apiKey = apiKeyInput.value
+  localStorage.setItem('openai-api-key', apiKey)
+  apiKeyModal.style.display = 'none'
+  loadModels()
+})
+
+// Handle analysis
+async function analyzeImage(imageBase64) {
+  analyzeBtn.disabled = true
+  analyzeBtn.textContent = 'Analyzing...'
+
+  try {
+    const response = await fetch(`${baseUrlInput.value}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: modelSelect.value,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: 'Analyze this image and provide: 1) A brief scene description 2) A list of key objects detected 3) Overall context or activity happening. Format the response as JSON with keys: description, objects (as array), and context.'
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:image/jpeg;base64,${imageBase64}`
+              }
+            }
+          ]
+        }],
+        max_tokens: 500
+      })
+    })
+
+    const data = await response.json()
+    
+    if (data.error) {
+      throw new Error(data.error.message)
+    }
+
+    const analysis = JSON.parse(data.choices[0].message.content)
+    
+    document.getElementById('description').textContent = analysis.description
+    document.getElementById('objects').textContent = analysis.objects.join(', ')
+    document.getElementById('context').textContent = analysis.context
+    
+  } catch (err) {
+    console.error('Error analyzing image:', err)
+    alert('Error analyzing image. Please check your API key and try again.')
+    
+    document.getElementById('description').textContent = 'Analysis failed'
+    document.getElementById('objects').textContent = 'Analysis failed'
+    document.getElementById('context').textContent = 'Analysis failed'
+  }
+
+  analyzeBtn.disabled = false
+  analyzeBtn.textContent = 'Analyze Scene'
+}
+
+analyzeBtn.addEventListener('click', async () => {
+  let imageBase64
+  
+  if (currentMode === 'camera') {
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(video, 0, 0)
+    imageBase64 = canvas.toDataURL('image/jpeg').split(',')[1]
+  } else {
+    imageBase64 = previewImage.src.split(',')[1]
+  }
+  
+  await analyzeImage(imageBase64)
+})
+
+// Load models on startup if API key exists
+if (apiKey) {
+  loadModels()
+}
+  </script>
+</body>
+</html>
